@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philippine Sales Data Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        .dataset-card {
+            margin: 25px 0;
+            padding: 25px;
+            border: 2px solid #e8f4fd;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8fbff 0%, #f1f8ff 100%);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .dataset-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .dataset-card h3 {
+            color: #2980b9;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .dataset-info {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .download-btn:active {
+            transform: translateY(0);
+        }
+        .seasonality-guide {
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #fef9e7 0%, #f8f3e3 100%);
+            border-radius: 12px;
+            border-left: 5px solid #f39c12;
+        }
+        .seasonality-guide h3 {
+            color: #e67e22;
+            margin-bottom: 15px;
+        }
+        .season-item {
+            background: white;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 3px solid #f39c12;
+        }
+        .note {
+            margin: 25px 0;
+            padding: 20px;
+            background: #e8f5e8;
+            border-radius: 10px;
+            border-left: 4px solid #27ae60;
+            color: #2c5d3d;
+        }
+        .preview-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+        .preview-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-family: 'Segoe UI', sans-serif;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇵🇭 Philippine Sales Data Generator</h1>
+        <p class="subtitle">Generate realistic CSV datasets with Philippine seasonality and promotion effects</p>
+        
+        <div class="dataset-card">
+            <h3>📊 Dataset 1: Beauty & Skincare Products</h3>
+            <div class="dataset-info">
+                <p><strong>📋 Categories:</strong> Skincare (1), Makeup (2), Hair Care (3)</p>
+                <p><strong>🛍️ Products:</strong> Whitening Face Wash, Foundation, Vitamin C Serum, Lipstick, Shampoo, etc.</p>
+                <p><strong>💰 Price Range:</strong> ₱2.99 - ₱149.99</p>
+                <p><strong>🧠 Logic:</strong> Daily per-product time series with promotions (10–30%, up to 50% on payday/holiday/double-days), weekend/payday boosts, and in-season effects.</p>
+                <p><strong>🧾 Columns:</strong> listPrice, unitPrice, inSeason, season, promotional, discountRate, isPayday, isDoubleDay, isWeekend, promoType</p>
+                <p><strong>📅 Date Range:</strong> January 2024 - December 2025</p>
+            </div>
+            <button class="download-btn" onclick="downloadBeautyDataset()">
+                💄 Download Beauty & Skincare Dataset (daily continuity, ~36k rows)
+            </button>
+            <div id="beauty-preview" class="preview-section" style="display: none;">
+                <div class="preview-title">Preview (first 5 rows):</div>
+                <div id="beauty-preview-content"></div>
+            </div>
+        </div>
+        
+        <div class="dataset-card">
+            <h3>👗 Dataset 2: Clothing & Accessories</h3>
+            <div class="dataset-info">
+                <p><strong>📋 Categories:</strong> Tops (1), Bottoms (2), Dresses (3), Accessories (4)</p>
+                <p><strong>👕 Products:</strong> T-Shirts, Jeans, Casual Dress, Handbags, Polo Shirts, etc.</p>
+                <p><strong>💰 Price Range:</strong> ₱2.99 - ₱299.99</p>
+                <p><strong>🧠 Logic:</strong> Daily per-product time series with promotions (payday, end-of-month, double-day, holidays), weekend boosts, and category seasonality.</p>
+                <p><strong>🧾 Columns:</strong> listPrice, unitPrice, inSeason, season, promotional, discountRate, isPayday, isDoubleDay, isWeekend, promoType</p>
+                <p><strong>📅 Date Range:</strong> January 2024 - December 2025</p>
+            </div>
+            <button class="download-btn" onclick="downloadClothingDataset()">
+                👗 Download Clothing & Accessories Dataset (daily continuity, ~49k rows)
+            </button>
+            <div id="clothing-preview" class="preview-section" style="display: none;">
+                <div class="preview-title">Preview (first 5 rows):</div>
+                <div id="clothing-preview-content"></div>
+            </div>
+        </div>
+        
+        <div class="seasonality-guide">
+            <h3>🌺 Philippine Seasonality Guide</h3>
+            <div class="season-item">
+                <strong>🎄 Christmas (Nov-Feb):</strong> Peak shopping season, gift-giving, bonus season
+            </div>
+            <div class="season-item">
+                <strong>☀️ Summer (Mar-May):</strong> Hot, dry season - vacation time, beach products popular
+            </div>
+            <div class="season-item">
+                <strong>🎒 Back-to-School (Jun-Jul):</strong> School opening season, uniforms, supplies
+            </div>
+            <div class="season-item">
+                <strong>🌧️ Rainy (Aug-Oct):</strong> Monsoon season, indoor activities, skincare focus
+            </div>
+        </div>
+        
+        <div class="note">
+            <strong>📝 Perfect for Testing:</strong> Both datasets contain randomized data with realistic Philippine market prices and quantities, ideal for testing dynamic functionality in your system with different category counts and product types.
+        </div>
+
+        <div class="dataset-card">
+            <h3>✅ Model Compatibility (Prophet + Dummies)</h3>
+            <div class="dataset-info">
+                <p><strong>Header schema:</strong> <code>id,category,productName,date,quantitySold,listPrice,unitPrice,inSeason,season,promotional,discountRate,isPayday,isDoubleDay,isWeekend,promoType</code></p>
+                <p><strong>Season labels:</strong> Christmas, Summer, Back-to-School, Rainy</p>
+                <p><strong>Promo types:</strong> none, regular, payday, double_day, holiday</p>
+                <p><strong>Booleans:</strong> <code>inSeason,promotional,isPayday,isDoubleDay,isWeekend</code> use 0/1</p>
+                <p><strong>Notes:</strong> Season and promo labels are normalized so one-hot columns match the trained model’s expected dummies (e.g., <code>season_Summer</code>, <code>promoType_payday</code>).</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Model compatibility: enforce consistent labels for dummies
+        const SEASON_LABELS = Object.freeze(['Christmas', 'Summer', 'Back-to-School', 'Rainy']);
+        const PROMO_TYPES = Object.freeze(['none', 'regular', 'payday', 'double_day', 'holiday']);
+
+        function normalizeSeason(label) {
+            return SEASON_LABELS.includes(label) ? label : 'Rainy';
+        }
+
+        function normalizePromo(label) {
+            return PROMO_TYPES.includes(label) ? label : 'none';
+        }
+
+        // Seasonality helpers
+        function getSeasonName(month) {
+            if (month >= 11 || month <= 2) return 'Christmas';
+            if (month >= 3 && month <= 5) return 'Summer';
+            if (month >= 6 && month <= 7) return 'Back-to-School';
+            return 'Rainy';
+        }
+
+        // Utility functions
+        function randomDate(start, end) {
+            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        }
+
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function randomFloat(min, max, decimals = 2) {
+            return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
+        }
+
+        function randomChoice(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Dataset 1: Beauty & Skincare Products
+        const beautyProducts = {
+            1: { // Skincare
+                name: 'Skincare',
+                products: [
+                    'Whitening Face Wash', 'Vitamin C Serum', 'Moisturizing Cream', 'Sunscreen SPF50',
+                    'Anti-Acne Gel', 'Toner', 'Night Cream', 'Eye Cream', 'Facial Scrub',
+                    'Cleansing Oil', 'Retinol Serum', 'Hyaluronic Acid', 'Niacinamide Serum',
+                    'Clay Mask', 'Sheet Mask', 'Micellar Water', 'Lip Balm'
+                ],
+                priceRange: [5.99, 89.99]
+            },
+            2: { // Makeup
+                name: 'Makeup',
+                products: [
+                    'Foundation', 'Concealer', 'BB Cream', 'Lipstick', 'Lip Gloss',
+                    'Mascara', 'Eyeliner', 'Eyeshadow Palette', 'Blush', 'Bronzer',
+                    'Highlighter', 'Setting Powder', 'Primer', 'Lip Tint', 'Brow Pencil',
+                    'False Eyelashes', 'Makeup Remover', 'Setting Spray'
+                ],
+                priceRange: [3.99, 149.99]
+            },
+            3: { // Hair Care
+                name: 'Hair Care',
+                products: [
+                    'Shampoo', 'Conditioner', 'Hair Mask', 'Hair Oil', 'Leave-in Treatment',
+                    'Hair Serum', 'Dry Shampoo', 'Hair Spray', 'Curl Cream', 'Heat Protectant',
+                    'Hair Wax', 'Hair Gel', 'Scalp Treatment', 'Anti-Dandruff Shampoo',
+                    'Color Shampoo', 'Hair Vitamins'
+                ],
+                priceRange: [4.99, 79.99]
+            }
+        };
+
+        // Dataset 2: Clothing & Accessories
+        const clothingProducts = {
+            1: { // Tops
+                name: 'Tops',
+                products: [
+                    'T-Shirt', 'Polo Shirt', 'Blouse', 'Tank Top', 'Crop Top',
+                    'Long Sleeve Shirt', 'Hoodie', 'Cardigan', 'Blazer', 'Jacket',
+                    'Sweater', 'Tube Top', 'Off-Shoulder Top', 'Button-up Shirt',
+                    'Graphic Tee', 'Sports Bra'
+                ],
+                priceRange: [8.99, 199.99]
+            },
+            2: { // Bottoms
+                name: 'Bottoms',
+                products: [
+                    'Jeans', 'Shorts', 'Leggings', 'Skirt', 'Dress Pants', 'Joggers',
+                    'Cargo Pants', 'Maxi Skirt', 'Mini Skirt', 'Wide-leg Pants',
+                    'Palazzo Pants', 'Denim Shorts', 'Athletic Shorts', 'Chinos',
+                    'Culottes', 'Pencil Skirt'
+                ],
+                priceRange: [12.99, 159.99]
+            },
+            3: { // Dresses & Sets
+                name: 'Dresses',
+                products: [
+                    'Casual Dress', 'Maxi Dress', 'Mini Dress', 'Cocktail Dress',
+                    'Sundress', 'Bodycon Dress', 'A-line Dress', 'Shift Dress',
+                    'Wrap Dress', 'Floral Dress', 'Evening Gown', 'Two-piece Set',
+                    'Jumpsuit', 'Romper', 'Co-ord Set', 'Party Dress'
+                ],
+                priceRange: [15.99, 299.99]
+            },
+            4: { // Accessories
+                name: 'Accessories',
+                products: [
+                    'Handbag', 'Crossbody Bag', 'Backpack', 'Wallet', 'Sunglasses',
+                    'Watch', 'Necklace', 'Earrings', 'Bracelet', 'Ring', 'Hat',
+                    'Scarf', 'Belt', 'Hair Accessories', 'Phone Case', 'Jewelry Set',
+                    'Tote Bag', 'Clutch', 'Hair Clips', 'Anklet'
+                ],
+                priceRange: [2.99, 249.99]
+            }
+        };
+
+        // Generate datasets
+        function generateBeautyDataset() {
+            const start = new Date('2024-01-01');
+            const end = new Date('2025-12-31');
+            let csv = 'id,category,productName,date,quantitySold,listPrice,unitPrice,inSeason,season,promotional,discountRate,isPayday,isDoubleDay,isWeekend,promoType\n';
+
+            let id = 1;
+            for (let cat = 1; cat <= 3; cat++) {
+                const categoryName = beautyProducts[cat].name;
+                const [minPrice, maxPrice] = beautyProducts[cat].priceRange;
+                for (const product of beautyProducts[cat].products) {
+                    // Fixed list price per product for realism
+                    const listPrice = randomFloat(minPrice, maxPrice, 2);
+
+                    // Iterate day by day
+                    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                        const date = new Date(d);
+                        const month = date.getMonth() + 1;
+                        const seasonName = normalizeSeason(getSeasonName(month));
+                        const inSeasonFlag = isInSeasonBeauty(categoryName, month) ? 1 : 0;
+                        const promo = getPromotionInfo(date, seasonName);
+                        const finalPrice = promo.promotional ? parseFloat((listPrice * (1 - promo.discountRate)).toFixed(2)) : listPrice;
+
+                        const [baseMin, baseMax] = getBeautyBaseRange(categoryName);
+                        const quantitySold = computeQuantity(baseMin, baseMax, inSeasonFlag, promo.promotional, promo.discountRate, date, seasonName);
+
+                        const dateStr = date.toISOString().split('T')[0];
+                        csv += `${id},${categoryName},${product},${dateStr},${quantitySold},${listPrice},${finalPrice},${inSeasonFlag},${seasonName},${promo.promotional},${promo.discountRate},${promo.isPayday?1:0},${promo.isDoubleDay?1:0},${promo.isWeekend?1:0},${promo.promoType}\n`;
+                        id++;
+                    }
+                }
+            }
+
+            return csv;
+        }
+
+        function generateClothingDataset() {
+            const start = new Date('2024-01-01');
+            const end = new Date('2025-12-31');
+            let csv = 'id,category,productName,date,quantitySold,listPrice,unitPrice,inSeason,season,promotional,discountRate,isPayday,isDoubleDay,isWeekend,promoType\n';
+
+            let id = 1;
+            for (let cat = 1; cat <= 4; cat++) {
+                const categoryName = clothingProducts[cat].name;
+                const [minPrice, maxPrice] = clothingProducts[cat].priceRange;
+                for (const product of clothingProducts[cat].products) {
+                    // Fixed list price per product for realism
+                    const listPrice = randomFloat(minPrice, maxPrice, 2);
+
+                    // Iterate day by day
+                    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                        const date = new Date(d);
+                        const month = date.getMonth() + 1;
+                        const seasonName = normalizeSeason(getSeasonName(month));
+                        const inSeasonFlag = isInSeasonClothing(categoryName, month) ? 1 : 0;
+                        const promo = getPromotionInfo(date, seasonName);
+                        const finalPrice = promo.promotional ? parseFloat((listPrice * (1 - promo.discountRate)).toFixed(2)) : listPrice;
+
+                        const [baseMin, baseMax] = getClothingBaseRange(categoryName);
+                        const quantitySold = computeQuantity(baseMin, baseMax, inSeasonFlag, promo.promotional, promo.discountRate, date, seasonName);
+
+                        const dateStr = date.toISOString().split('T')[0];
+                        csv += `${id},${categoryName},${product},${dateStr},${quantitySold},${listPrice},${finalPrice},${inSeasonFlag},${seasonName},${promo.promotional},${promo.discountRate},${promo.isPayday?1:0},${promo.isDoubleDay?1:0},${promo.isWeekend?1:0},${promo.promoType}\n`;
+                        id++;
+                    }
+                }
+            }
+
+            return csv;
+        }
+
+        // Download function
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Button click handlers
+        function downloadBeautyDataset() {
+            const dataset = generateBeautyDataset();
+            downloadCSV(dataset, 'beauty_skincare_sales_2024_2025_daily.csv');
+            
+            // Show preview
+            const preview = document.getElementById('beauty-preview');
+            const previewContent = document.getElementById('beauty-preview-content');
+            const lines = dataset.split('\n').slice(0, 6); // Header + 5 rows
+            previewContent.textContent = lines.join('\n');
+            preview.style.display = 'block';
+        }
+
+        function downloadClothingDataset() {
+            const dataset = generateClothingDataset();
+            downloadCSV(dataset, 'clothing_accessories_sales_2024_2025_daily.csv');
+            
+            // Show preview
+            const preview = document.getElementById('clothing-preview');
+            const previewContent = document.getElementById('clothing-preview-content');
+            const lines = dataset.split('\n').slice(0, 6); // Header + 5 rows
+            previewContent.textContent = lines.join('\n');
+            preview.style.display = 'block';
+        }
+        // Date utility helpers
+        function getLastDayOfMonth(date) {
+            return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        }
+
+        function isWeekend(date) {
+            const d = date.getDay();
+            return d === 0 || d === 6;
+        }
+
+        // Promotion logic based on local retail patterns
+        function getPromotionInfo(date, seasonName) {
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const lastDay = getLastDayOfMonth(date);
+            const isDoubleDay = (day === month && month <= 12);
+            const isPayday = (day === 15 || day === lastDay);
+            const weekend = isWeekend(date);
+            const isHolidaySeason = (seasonName === 'Christmas' && (month === 11 || month === 12));
+
+            let promoProb = 0.08; // base
+            if (isDoubleDay) promoProb += 0.18;
+            if (isPayday) promoProb += 0.22;
+            if (isHolidaySeason) promoProb += 0.25;
+            if (weekend) promoProb += 0.05;
+            promoProb = Math.min(0.9, promoProb);
+
+            const promotional = Math.random() < promoProb ? 1 : 0;
+            let promoType = 'none';
+            let discountRate = 0;
+            if (promotional) {
+                if (isHolidaySeason) {
+                    promoType = 'holiday';
+                    discountRate = randomFloat(0.25, 0.50, 2);
+                } else if (isPayday) {
+                    promoType = 'payday';
+                    discountRate = randomFloat(0.20, 0.50, 2);
+                } else if (isDoubleDay) {
+                    promoType = 'double_day';
+                    discountRate = randomFloat(0.20, 0.50, 2);
+                } else {
+                    promoType = 'regular';
+                    discountRate = randomFloat(0.10, 0.30, 2);
+                }
+            }
+
+            // Ensure promoType matches the model's expected set
+            promoType = normalizePromo(promoType);
+            return { promotional, discountRate, promoType, isPayday, isDoubleDay, isWeekend: weekend };
+        }
+
+        // Seasonality: category-specific in-season flags
+        function isInSeasonBeauty(categoryName, month) {
+            // Skincare: Summer & Rainy (sunscreen/hydration/acne care)
+            // Makeup: Christmas & holiday months (events, parties)
+            // Hair Care: Summer (heat/UV, outdoor), modest otherwise
+            if (categoryName === 'Skincare') return [3,4,5,8,9,10].includes(month);
+            if (categoryName === 'Makeup') return [11,12,1,2].includes(month);
+            if (categoryName === 'Hair Care') return [3,4,5].includes(month);
+            return false;
+        }
+
+        function isInSeasonClothing(categoryName, month) {
+            // Tops: Summer & Back-to-School
+            // Bottoms: Back-to-School & Rainy
+            // Dresses: Summer & Holiday
+            // Accessories: Summer & Holiday
+            if (categoryName === 'Tops') return [3,4,5,6,7].includes(month);
+            if (categoryName === 'Bottoms') return [6,7,8,9,10].includes(month);
+            if (categoryName === 'Dresses') return [3,4,5,11,12,1].includes(month);
+            if (categoryName === 'Accessories') return [3,4,5,11,12,1].includes(month);
+            return false;
+        }
+
+        // Quantity model
+        function computeQuantity(baseMin, baseMax, inSeason, promotional, discountRate, date, seasonName) {
+            let base = randomInt(baseMin, baseMax);
+            let multiplier = 1;
+
+            if (inSeason) {
+                multiplier *= randomFloat(1.20, 1.50, 2);
+            } else {
+                multiplier *= randomFloat(0.85, 1.00, 2);
+            }
+
+            if (promotional) {
+                const promoBoost = 1 + discountRate * 1.5; // stronger boost for deeper discounts
+                multiplier *= Math.min(1.7, promoBoost);
+                if (isWeekend(date)) multiplier *= randomFloat(1.10, 1.30, 2);
+            }
+
+            // Payday/end-of-month small boost
+            const day = date.getDate();
+            const lastDay = getLastDayOfMonth(date);
+            if (day === 15 || day === lastDay) {
+                multiplier *= randomFloat(1.10, 1.25, 2);
+            }
+
+            // Weekend baseline boost
+            if (isWeekend(date)) multiplier *= randomFloat(1.05, 1.15, 2);
+
+            // Random noise
+            multiplier *= randomFloat(0.90, 1.10, 2);
+
+            let qty = Math.round(base * multiplier);
+            if (qty < 1) qty = 1;
+            const hardMax = baseMax * 2; // cap extreme spikes
+            if (qty > hardMax) qty = hardMax;
+            return qty;
+        }
+
+        function getBeautyBaseRange(name) {
+            switch (name) {
+                case 'Skincare': return [2, 40];
+                case 'Makeup': return [1, 35];
+                case 'Hair Care': return [1, 45];
+                default: return [1, 40];
+            }
+        }
+
+        function getClothingBaseRange(name) {
+            switch (name) {
+                case 'Tops': return [2, 35];
+                case 'Bottoms': return [1, 30];
+                case 'Dresses': return [1, 25];
+                case 'Accessories': return [2, 40];
+                default: return [1, 35];
+            }
+        }
+    </script>
+</body>
+</html>
